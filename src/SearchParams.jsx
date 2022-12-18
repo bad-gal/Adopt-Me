@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import AdoptedPetContext from "./AdoptedPetContext";
 import Results from "./Results";
 import useBreedList from "./useBreedList";
 import fetchSearch from "./fetchSearch";
@@ -12,6 +13,7 @@ const SearchParams = () => {
     animal: "",
     breed: "",
   });
+  const [adoptedPet] = useContext(AdoptedPetContext);
   const [animal, setAnimal] = useState("");
   const [breeds] = useBreedList(animal);
 
@@ -26,16 +28,23 @@ const SearchParams = () => {
           const formData = new FormData(e.target);
           const obj = {
             animal: formData.get("animal") ?? "",
-            location: formData.get("location") ?? "",
             breed: formData.get("breed") ?? "",
+            location: formData.get("location") ?? "",
           };
           setRequestParams(obj);
         }}
       >
+        {adoptedPet ? (
+          <div className="pet image-container">
+            <img src={adoptedPet.images[0]} alt={adoptedPet.name} />
+          </div>
+        ) : null}
+
         <label htmlFor="location">
           Location
           <input name="location" id="location" placeholder="Location" />
         </label>
+
         <label htmlFor="animal">
           Animal
           <select
@@ -47,19 +56,25 @@ const SearchParams = () => {
           >
             <option />
             {ANIMALS.map((animal) => (
-              <option key={animal}>{animal}</option>
+              <option key={animal} value={animal}>
+                {animal}
+              </option>
             ))}
           </select>
         </label>
+
         <label htmlFor="breed">
           Breed
-          <select id="breed" disabled={breeds.length === 0} name="breed">
+          <select id="breed" disabled={!breeds.length} name="breed">
             <option />
             {breeds.map((breed) => (
-              <option key={breed}>{breed}</option>
+              <option key={breed} value={breed}>
+                {breed}
+              </option>
             ))}
           </select>
         </label>
+
         <button>Submit</button>
       </form>
       <Results pets={pets} />
